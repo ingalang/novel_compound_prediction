@@ -24,7 +24,7 @@ def main():
 
 
     args = parser.parse_args()
-    year, indir = args.year, args.indir
+    year, indir = args.year, args.in_dir
 
     iter_files(indir, year)
 
