@@ -24,7 +24,7 @@ class CorpusReader(object):
                 yield infile.read()
 
 def get_preprocessed_sentences(text):
-    url_reg = re.compile('(http [\s\W]*|www [\s\W]*)\S+|<p>|[@]+\w*')
+    url_reg = re.compile('(http [\s\W]*|www [\s\W]*)\S+|<p>|[@]+\w*|^\s+')
     whitespace_reg = re.compile('\s+')
     sentences = text.split(' . ')
     return [re.sub(whitespace_reg, ' ', re.sub(url_reg, '', sent)) for sent in sentences]
