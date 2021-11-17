@@ -27,3 +27,6 @@ def main():
     year, indir = args.year, args.indir
 
     iter_files(indir, year)
+
+if __name__ == '__main__':
+    main()
