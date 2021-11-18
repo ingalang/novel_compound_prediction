@@ -9,8 +9,7 @@ def iter_files(top_dir, year):
             subdir = join(top_dir, name)
             for filename in os.listdir(subdir):
                 if year in filename:
-                    with open(join(subdir, filename)) as infile:
-                        yield (join(subdir, filename))
+                    yield (join(subdir, filename))
 
 class CorpusReader(object):
     def __init__(self, top_dir, year):
