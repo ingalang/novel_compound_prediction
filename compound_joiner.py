@@ -15,7 +15,6 @@ def get_compounds_from_sentence(sentence, pos_tagger, toggle_lowercase=False):
     #TODO bør du bruke TrueCase eller noe for å fikse setninger som er i all caps??? (det er noen)
     tags = pos_tagger(sentence)
     tagged_sent = ' '.join(['_'.join([word.text, word.tag_]) for word in tags])
-    print(tagged_sent)
     noun_tags = ['NN', 'NNS']
     compounds = []
     for i in range(len(tags)-1):
