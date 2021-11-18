@@ -15,7 +15,7 @@ class SentenceReader(object):
             for line in infile:
                 yield line
 
-def get_compound_list(top_dir, start_year, end_year, separate_years=False):
+def get_compound_generator(top_dir, start_year, end_year, separate_years=False):
     """
     :param top_dir:
     :param start_year:
@@ -24,8 +24,9 @@ def get_compound_list(top_dir, start_year, end_year, separate_years=False):
     :return:
     """
     pos_tagger = spacy.load('en_core_web_sm')
-    compounds = []
+    #compounds = []
     for year in range(start_year, end_year + 1):
+        print(f'Processing year: {year}')
         filepath = os.path.join(top_dir, f'COCA_{year}.txt')
         sentence_reader = SentenceReader(filepath)
         for sentence in sentence_reader:
@@ -33,11 +34,11 @@ def get_compound_list(top_dir, start_year, end_year, separate_years=False):
             if separate_years:
                 pass
             else:
-                compounds = list(itertools.chain(compounds, sentence_compounds))
+                yield sentence_compounds
         if separate_years:
             #TODO save files & counts for separate years
             pass
-    return compounds
+    #return compounds
 
 def save_dataset(compounds, save_dir, start_year, end_year, data_name, separate_years=False):
     if separate_years:
@@ -50,6 +51,15 @@ def save_dataset(compounds, save_dir, start_year, end_year, data_name, separate_
             for compound in compound_set:
                 outfile.write(f'{compound} \n')
         print(f'Saved file {filepath}')
+
+def incrementally_store_compounds(top_dir, save_dir, start_year, end_year, data_name, separate_years=False):
+    filename = f'COCA_{start_year}-{end_year}_{data_name}_all.txt'
+    filepath = os.path.join(save_dir, filename)
+    print(f'Starting saving compounds to file: {filepath}')
+    with open(filepath, 'w') as outfile:
+        for compound in get_compound_generator(top_dir, start_year, end_year):
+            outfile.write(f'{compound} \n')
+    print(f'Successfully saved file: {filepath}')
 
 def save_compound_counts(compounds, save_dir, start_year, end_year, data_name, separate_years=False):
     if separate_years:
@@ -68,9 +78,9 @@ def save_compound_counts(compounds, save_dir, start_year, end_year, data_name, s
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--top_dir', default='test_COCA', required=False)
-    parser.add_argument('--start_year', default=1999, required=False, type=int,
+    parser.add_argument('--start_year', default=1990, required=False, type=int,
                         help='Start of the year range you want to collect compounds from (inclusive)')
-    parser.add_argument('--end_year', default=2000, required=False, type=int,
+    parser.add_argument('--end_year', default=1991, required=False, type=int,
                         help='End of the year range you want to collect compounds from (inclusive)')
     parser.add_argument('--data_name', default='train', required=False)
     parser.add_argument('--save_dir', default='test_COCA', required=False,
@@ -81,20 +91,22 @@ def main():
     top_dir, start_year, end_year, data_name, save_dir = \
         args.top_dir, args.start_year, args.end_year, args.data_name, args.save_dir
 
-    compounds = get_compound_list(top_dir, start_year, end_year)
-    compounds = list(compounds)
-    print(compounds)
-    save_dataset(compounds=compounds,
-                 save_dir=save_dir,
-                 start_year=start_year,
-                 end_year=end_year,
-                 data_name=data_name)
+    incrementally_store_compounds(top_dir, save_dir, start_year, end_year, data_name)
 
-    save_compound_counts(compounds=compounds,
-                         save_dir=save_dir,
-                         start_year=start_year,
-                         end_year=end_year,
-                         data_name=data_name)
+    # compounds = get_compound_generator(top_dir, start_year, end_year)
+    # compounds = list(compounds)
+    # print(compounds)
+    # save_dataset(compounds=compounds,
+    #              save_dir=save_dir,
+    #              start_year=start_year,
+    #              end_year=end_year,
+    #              data_name=data_name)
+
+    # save_compound_counts(compounds=compounds,
+    #                      save_dir=save_dir,
+    #                      start_year=start_year,
+    #                      end_year=end_year,
+    #                      data_name=data_name)
 
 if __name__ == '__main__':
     main()
