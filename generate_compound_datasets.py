@@ -7,6 +7,7 @@ from collections import Counter
 import json
 import multiprocessing as mp
 import re
+import tqdm
 
 class SentenceReader(object):
     def __init__(self, filename):
@@ -17,19 +18,11 @@ class SentenceReader(object):
             for line in infile:
                 yield line
 
-def get_compounds(top_dir, year, pos_tagger):
-    filename = f'COCA_{year}.txt'
-    filepath = os.path.join(top_dir, filename)
-    with open(filepath, 'r') as infile:
-        full_text = infile.read()
-    print('Starting pos-tagging...')
-    tags = pos_tagger(full_text)
-    print('Finished pos-tagging. Starting pattern matching (regex search)')
+def get_compounds(text, pos_tagger):
+    tags = pos_tagger(text)
     tagged_text = ' '.join(['_'.join((token.text, token.tag_)) for token in tags])
-    print(tagged_text)
     regex = r"(?<!(_NN|NNS)) ((\w+)_NN[S]?(?!P) (\w+)_NN(?!P))(?!( [\w]+?_NN(?!P)))"
     compounds = [' '.join((match.group(3), match.group(4))) for match in re.finditer(regex, tagged_text)]
-    print(f'Found {len(compounds)} compounds (tokens). \n')
     return compounds
 
 def get_compound_generator(top_dir, start_year, end_year, separate_years=False):
@@ -113,7 +106,12 @@ def main():
 
     for year in range(start_year, end_year + 1):
         print(f'Starting compound extraction for year {year}')
-        all_compounds.extend(get_compounds(top_dir, year, pos_tagger))
+        filename = f'COCA_{year}.txt'
+        filepath = os.path.join(top_dir, filename)
+        with tqdm.tqdm(total=os.path.getsize(filepath)) as pbar:
+            for line in open(filepath, 'r'):
+                all_compounds.extend(get_compounds(line, pos_tagger))
+                pbar.update(len(line.encode('utf-8')))
         save_dataset(all_compounds, save_dir, start_year, end_year, data_name)
 
 
