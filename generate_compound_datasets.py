@@ -114,22 +114,12 @@ def main():
         args.top_dir, args.start_year, args.end_year, args.data_name, args.save_dir
 
     pool_args = ((top_dir, year) for year in range(start_year, end_year + 1))
-    print('pool args:')
-    for args in pool_args:
-        print(args)
 
     with mp.Pool(mp.cpu_count()-1) as pool:
         comps = pool.starmap(find_and_save_compounds, pool_args)
 
     for compounds in comps:
         save_dataset(compounds, save_dir, start_year, end_year, data_name)
-
-
-
-
-
-
-
 
 if __name__ == '__main__':
     main()
