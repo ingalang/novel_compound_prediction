@@ -85,6 +85,18 @@ def save_compound_counts(compounds, save_dir, start_year, end_year, data_name, s
         json.dump(count_dict, outfile)
     print(f'Saved compound counts to file: {filepath}')
 
+def find_and_save_compounds(top_dir, year):
+    all_compounds = []
+    pos_tagger = spacy.load('en_core_web_sm')
+    print(f'Starting compound extraction for year {year}')
+    filename = f'COCA_{year}.txt'
+    filepath = os.path.join(top_dir, filename)
+    with tqdm.tqdm(total=os.path.getsize(filepath)) as pbar:
+        for line in open(filepath, 'r'):
+            all_compounds.extend(get_compounds(line, pos_tagger))
+            pbar.update(len(line.encode('utf-8')))
+    return all_compounds
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--top_dir', default='test_COCA', required=False)
@@ -100,19 +112,18 @@ def main():
 
     top_dir, start_year, end_year, data_name, save_dir = \
         args.top_dir, args.start_year, args.end_year, args.data_name, args.save_dir
-    pos_tagger = spacy.load('en_core_web_sm')
 
-    all_compounds = []
+    pool_args = ((top_dir, year) for year in range(start_year, end_year + 1))
+    print('pool args:')
+    for args in pool_args:
+        print(args)
 
-    for year in range(start_year, end_year + 1):
-        print(f'Starting compound extraction for year {year}')
-        filename = f'COCA_{year}.txt'
-        filepath = os.path.join(top_dir, filename)
-        with tqdm.tqdm(total=os.path.getsize(filepath)) as pbar:
-            for line in open(filepath, 'r'):
-                all_compounds.extend(get_compounds(line, pos_tagger))
-                pbar.update(len(line.encode('utf-8')))
-        save_dataset(all_compounds, save_dir, start_year, end_year, data_name)
+    with mp.Pool(mp.cpu_count()-1) as pool:
+        comps = pool.starmap(find_and_save_compounds, pool_args)
+
+    for compounds in comps:
+        save_dataset(compounds, save_dir, start_year, end_year, data_name)
+
 
 
 
