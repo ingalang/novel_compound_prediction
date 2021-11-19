@@ -9,15 +9,6 @@ import multiprocessing as mp
 import re
 import tqdm
 
-class SentenceReader(object):
-    def __init__(self, filename):
-        self.filename = filename
-
-    def __iter__(self):
-        with open(self.filename, 'r') as infile:
-            for line in infile:
-                yield line
-
 def get_compounds(text, pos_tagger):
     tags = pos_tagger(text)
     tagged_text = ' '.join(['_'.join((token.text, token.tag_)) for token in tags])
@@ -85,7 +76,7 @@ def save_compound_counts(compounds, save_dir, start_year, end_year, data_name, s
         json.dump(count_dict, outfile)
     print(f'Saved compound counts to file: {filepath}')
 
-def find_and_save_compounds(top_dir, year):
+def find_and_save_compounds(top_dir, save_dir, year):
     all_compounds = []
     pos_tagger = spacy.load('en_core_web_sm')
     print(f'Starting compound extraction for year {year}')
@@ -95,7 +86,12 @@ def find_and_save_compounds(top_dir, year):
         for line in open(filepath, 'r'):
             all_compounds.extend(get_compounds(line, pos_tagger))
             pbar.update(len(line.encode('utf-8')))
-    return all_compounds
+    filename = f'COCA_{year}_all_compound_tokens.txt'
+    filepath = os.path.join(save_dir, filename)
+    with open(filepath, 'w') as outfile:
+        for compound in all_compounds:
+            outfile.write(f'{compound} \n')
+    print(f'Saved file: {filepath}')
 
 def main():
     parser = argparse.ArgumentParser()
@@ -113,13 +109,10 @@ def main():
     top_dir, start_year, end_year, data_name, save_dir = \
         args.top_dir, args.start_year, args.end_year, args.data_name, args.save_dir
 
-    pool_args = ((top_dir, year) for year in range(start_year, end_year + 1))
+    pool_args = ((top_dir, save_dir, year) for year in range(start_year, end_year + 1))
 
     with mp.Pool(mp.cpu_count()-1) as pool:
-        comps = pool.starmap(find_and_save_compounds, pool_args)
-
-    for compounds in comps:
-        save_dataset(compounds, save_dir, start_year, end_year, data_name)
+        pool.starmap(find_and_save_compounds, pool_args)
 
 if __name__ == '__main__':
     main()
