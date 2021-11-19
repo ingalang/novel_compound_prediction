@@ -109,6 +109,8 @@ def main():
     top_dir, start_year, end_year, data_name, save_dir = \
         args.top_dir, args.start_year, args.end_year, args.data_name, args.save_dir
 
+    print(f'cpu count: {mp.cpu_count()}')
+
     pool_args = ((top_dir, save_dir, year) for year in range(start_year, end_year + 1))
 
     with mp.Pool(mp.cpu_count()-1) as pool:
