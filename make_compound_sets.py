@@ -2,6 +2,12 @@ from compound_counts import load_compounds, singularize_heads
 import argparse
 import os
 
+def load_dataset(dir, data_name):
+    filepath = os.path.join(dir, f'COCA_{data_name}.txt')
+    with open(filepath, 'r') as compound_file:
+        compound_list = [line for line in compound_file]
+    return compound_list
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--top_dir', default='test_COCA', required=False)
@@ -27,6 +33,15 @@ def main():
         all_compounds.extend(singularized_compounds)
 
     compound_set = {*all_compounds}
+    if data_name == 'dev':
+        train_data = load_dataset(save_dir, 'train')
+        compound_set = [compound for compound in compound_set if compound not in train_data]
+    elif data_name == 'test':
+        train_data = load_dataset(save_dir, 'train')
+        dev_data = load_dataset(save_dir, 'dev')
+        compound_set = [compound for compound in compound_set
+                        if compound not in train_data and compound not in dev_data]
+
     filepath = os.path.join(save_dir, f'COCA_{data_name}.txt')
     with open(filepath, 'w') as outfile:
         for compound in compound_set:
