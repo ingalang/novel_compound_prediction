@@ -8,11 +8,9 @@ def singularize_heads(compounds: list):
     p = inflect.engine()
     singularized_compounds = []
     for comp in compounds:
-        mod, head = comp.split()
-        print('head: ', head)
+        mod, head = comp.lower().split()
         singular_head = p.singular_noun(head)
         head = singular_head if singular_head else head
-        print('singularized head: ', head)
         singularized_compounds.append(' '.join((mod, head)))
     return singularized_compounds
 
@@ -48,6 +46,7 @@ def main():
         args.top_dir, args.start_year, args.end_year, args.save_dir
 
     for year in range(start_year, end_year + 1):
+        print(f'Processing {year} data...')
         compound_list = load_compounds(top_dir, year)
         save_compound_counts_for_year(compound_list, year, save_dir)
 
