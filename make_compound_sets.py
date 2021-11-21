@@ -1,6 +1,7 @@
 from compound_counts import load_compounds, singularize_heads
 import argparse
 import os
+import numpy as np
 
 def load_dataset(dir, data_name):
     filepath = os.path.join(dir, f'COCA_{data_name}.txt')
@@ -28,24 +29,35 @@ def main():
     all_compounds = []
 
     for year in range(start_year, end_year + 1):
+        print(f'Processing compounds from year {year}')
         compound_list = load_compounds(top_dir, year)
         singularized_compounds = singularize_heads(compound_list)
         all_compounds.extend(singularized_compounds)
 
-    compound_set = {*all_compounds}
+    unique_compounds = list({*all_compounds})
+
     if data_name == 'dev':
         train_data = load_dataset(save_dir, 'train')
-        compound_set = [compound for compound in compound_set if compound not in train_data]
+        print('Making train dict...')
+        train_dict = {word.strip('\n\r') : 0 for word in train_data}
+        print('Making set of compounds for dev set that are not in train set...')
+        unique_compounds = [comp for comp in unique_compounds if comp not in train_dict]
     elif data_name == 'test':
+        print('Making train dict...')
         train_data = load_dataset(save_dir, 'train')
-        dev_data = load_dataset(save_dir, 'dev')
-        compound_set = [compound for compound in compound_set
-                        if compound not in train_data and compound not in dev_data]
+        train_dict = {word.strip('\n\r'): 0 for word in train_data}
 
+        print('Making dev dict...')
+        dev_data = load_dataset(save_dir, 'dev')
+        dev_dict = {word.strip('\n\r'): 0 for word in dev_data}
+
+        unique_compounds = [compound.strip() for compound in unique_compounds
+                        if compound.strip() not in train_dict and compound not in dev_dict]
+    print(f'Saving file as: COCA_{data_name}.txt')
     filepath = os.path.join(save_dir, f'COCA_{data_name}.txt')
     with open(filepath, 'w') as outfile:
-        for compound in compound_set:
-            outfile.write(f'{compound} \n')
+        for compound in unique_compounds:
+            outfile.write(f'{compound}\n')
 
 
 if __name__ == '__main__':
