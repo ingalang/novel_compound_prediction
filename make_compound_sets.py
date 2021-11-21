@@ -61,7 +61,10 @@ def main():
         unique_compounds = [compound.strip() for compound in unique_compounds
                         if compound.strip() not in train_dict and compound not in dev_dict]
     print(f'Saving file as: COCA_{data_name}.txt')
-    filepath = os.path.join(save_dir, f'COCA_{data_name}.txt')
+    if freq_cutoff:
+        filepath = os.path.join(save_dir, f'COCA_{data_name}_min{freq_cutoff}.txt')
+    else:
+        filepath = os.path.join(save_dir, f'COCA_{data_name}.txt')
     with open(filepath, 'w') as outfile:
         for compound in unique_compounds:
             outfile.write(f'{compound}\n')
