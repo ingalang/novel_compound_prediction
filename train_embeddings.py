@@ -20,7 +20,7 @@ def train_model_on_year(top_dir, year, model_path=None):
     filepath = os.path.join(top_dir, f'COCA_{year}.txt')
     sentence_generator = SentenceReader(filepath)
     if model_path == None:
-        model = Word2Vec(sentences=sentence_generator, size=300, window=2, min_count=5, workers=3)
+        model = Word2Vec(sentences=sentence_generator, vector_size=300, window=2, min_count=5, workers=3)
     else:
         model = Word2Vec.load(model_path)
         model.train(sentences=sentence_generator, epochs=model.epochs)
