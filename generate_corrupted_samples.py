@@ -56,8 +56,6 @@ def main():
     print('Generating corrupted compounds...')
     corrupted_compounds = list(chain.from_iterable([generate_corruped_samples(compound, n, constituent, constituent_list, compound_dict)
                                  for compound in compound_list]))
-    print(len(corrupted_compounds))
-    print(corrupted_compounds)
 
     compound_lists_divided = [corrupted_compounds[i: len(corrupted_compounds): n] for i in range(0, n)]
 
