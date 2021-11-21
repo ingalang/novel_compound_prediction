@@ -25,9 +25,6 @@ def save_compound_counts_for_year(compounds, year, save_dir):
     with open(os.path.join(save_dir, f'compound_counts_{year}.json'), 'w') as outfile:
         json.dump(counts, outfile)
 
-def save_compound_counts_for_range(dir, start_year, end_year):
-    pass
-
 def load_compound_counts(dir, year):
     filepath = os.path.join(dir, f'compound_counts_{year}.json')
     with open(filepath, 'r') as infile:

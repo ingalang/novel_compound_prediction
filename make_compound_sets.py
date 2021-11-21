@@ -1,7 +1,7 @@
 from compound_counts import load_compounds, singularize_heads
 import argparse
 import os
-import numpy as np
+from collections import Counter
 
 def load_dataset(dir, data_name):
     filepath = os.path.join(dir, f'COCA_{data_name}.txt')
@@ -18,12 +18,15 @@ def main():
                         help='End of the year range you want to collect compounds from (inclusive)')
     parser.add_argument('--save_dir', default='test_COCA', required=False,
                         help='Path to directory where you want to save the count & compound files')
-    parser.add_argument('--data_name', required=True, type=str, help='What kind of dataset you are making (train, dev, test)')
+    parser.add_argument('--data_name', required=True, type=str,
+                        help='What kind of dataset you are making (train, dev, test)')
+    parser.add_argument('--freq_cutoff', default=3, type=int,
+                        help='Only include compounds that occur at least this number of times')
 
     args = parser.parse_args()
 
-    top_dir, start_year, end_year, save_dir, data_name = \
-        args.top_dir, args.start_year, args.end_year, args.save_dir, args.data_name
+    top_dir, start_year, end_year, save_dir, data_name, freq_cutoff = \
+        args.top_dir, args.start_year, args.end_year, args.save_dir, args.data_name, args.freq_cutoff
     assert(data_name in ['train', 'dev', 'test']), "argument --data_name must be either train, dev, or test"
 
     all_compounds = []
@@ -33,6 +36,10 @@ def main():
         compound_list = load_compounds(top_dir, year)
         singularized_compounds = singularize_heads(compound_list)
         all_compounds.extend(singularized_compounds)
+
+    if freq_cutoff:
+        compound_counts = dict(Counter(all_compounds))
+        all_compounds = [comp for comp in compound_counts if compound_counts[comp] >= freq_cutoff]
 
     unique_compounds = list({*all_compounds})
 
