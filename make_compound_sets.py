@@ -2,6 +2,7 @@ from compound_counts import load_compounds, singularize_heads
 import argparse
 import os
 from collections import Counter
+from gensim.models import Word2Vec
 
 def load_dataset(dir, data_name):
     filepath = os.path.join(dir, f'COCA_{data_name}.txt')
@@ -17,7 +18,7 @@ def main():
     parser.add_argument('--end_year', default=2000, required=False, type=int,
                         help='End of the year range you want to collect compounds from (inclusive)')
     parser.add_argument('--save_dir', default='test_COCA', required=False,
-                        help='Path to directory where you want to save the count & compound files')
+                        help='Path to directory where you want to save the datasets')
     parser.add_argument('--data_name', required=True, type=str,
                         help='What kind of dataset you are making (train, dev, test)')
     parser.add_argument('--freq_cutoff', default=3, type=int,
@@ -43,12 +44,15 @@ def main():
 
     unique_compounds = list({*all_compounds})
 
+    word2vec_model = Word2Vec.load('word2vec_2009.model')
+
     if data_name == 'dev':
         train_data = load_dataset(save_dir, 'train')
         print('Making train dict...')
         train_dict = {word.strip('\n\r') : 0 for word in train_data}
         print('Making set of compounds for dev set that are not in train set...')
-        unique_compounds = [comp for comp in unique_compounds if comp not in train_dict]
+        unique_compounds = [comp for comp in unique_compounds if comp not in train_dict and
+                            comp.split()[0] in word2vec_model.wv and comp.split()[1] in word2vec_model.wv]
     elif data_name == 'test':
         print('Making train dict...')
         train_data = load_dataset(save_dir, 'train')
@@ -59,7 +63,10 @@ def main():
         dev_dict = {word.strip('\n\r'): 0 for word in dev_data}
 
         unique_compounds = [compound.strip() for compound in unique_compounds
-                        if compound.strip() not in train_dict and compound not in dev_dict]
+                        if compound.strip() not in train_dict
+                            and compound not in dev_dict
+                            and compound.split()[0] in word2vec_model.wv
+                            and compound.split()[1] in word2vec_model.wv]
 
     if freq_cutoff:
         filepath = os.path.join(save_dir, f'COCA_{data_name}_min{freq_cutoff}.txt')
