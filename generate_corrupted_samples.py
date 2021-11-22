@@ -11,21 +11,21 @@ def corrupt_compound(compound, new_constituent, new_constituent_type):
     else:
         return ' '.join((mod, new_constituent))
 
-def generate_corruped_samples(compound, n, constituent_type, constituent_list, attested_compounds):
+def generate_corruped_samples(compound, n, constituent_type, constituent_list, attested_compounds, generated_compounds):
     assert constituent_type in ['mods', 'heads'], 'constituent_type must be either mods or heads'
-    corrupted_samples = []
     corrupted_samples_complete = False
-
+    num_new_compounds = 0
     while not corrupted_samples_complete:
         new_constituents = random.sample(constituent_list, n*2)
         for word in new_constituents:
             new_compound = corrupt_compound(compound, word, constituent_type)
-            if new_compound not in attested_compounds:
-                corrupted_samples.append(new_compound)
-                if len(corrupted_samples) >= n:
+            if new_compound not in attested_compounds and new_compound not in generated_compounds:
+                generated_compounds[new_compound] = 0
+                num_new_compounds += 1
+                if num_new_compounds >= n:
                     corrupted_samples_complete = True
                     break
-    return corrupted_samples
+    return generated_compounds
 
 def main():
     parser = argparse.ArgumentParser()
@@ -45,7 +45,6 @@ def main():
     with open(in_path, 'r') as infile:
         compound_list = [line.strip('\n\r') for line in infile]
 
-    print(compound_list)
     compound_dict = {comp : 0 for comp in compound_list}
 
     if constituent == 'mods':
@@ -54,8 +53,11 @@ def main():
         constituent_list = [comp.split()[1] for comp in compound_list]
 
     print('Generating corrupted compounds...')
-    corrupted_compounds = list(chain.from_iterable([generate_corruped_samples(compound, n, constituent, constituent_list, compound_dict)
-                                 for compound in compound_list]))
+    corrupted_compounds = {}
+    for compound in compound_list:
+        corrupted_compounds = generate_corruped_samples(compound, n, constituent, constituent_list, compound_dict, corrupted_compounds)
+
+    corrupted_compounds = list(corrupted_compounds.keys())
 
     compound_lists_divided = [corrupted_compounds[i: len(corrupted_compounds): n] for i in range(0, n)]
 
