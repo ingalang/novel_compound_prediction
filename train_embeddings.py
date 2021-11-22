@@ -24,11 +24,11 @@ def train_model_on_year(top_dir, model_dir, year):
     sentence_generator = SentenceReader(filepath)
     if model_path == None:
         print('model path is none')
-        model = Word2Vec(sentences=sentence_generator, vector_size=300, window=2, min_count=5, workers=3)
+        model = Word2Vec(sentence_generator, vector_size=300, window=2, min_count=5, workers=3)
     else:
         print(f'loading model from: {model_path}')
         model = Word2Vec.load(model_path)
-        model.train(sentences=sentence_generator, epochs=model.epochs, total_examples=model.corpus_count)
+        model.train(sentence_generator, epochs=model.epochs, total_examples=model.corpus_count)
     return model
 
 def train_years(start_year, end_year, data_dir, model_dir):
