@@ -28,7 +28,7 @@ def train_model_on_year(top_dir, model_dir, year):
     else:
         print(f'loading model from: {model_path}')
         model = Word2Vec.load(model_path)
-        model.train(sentences=sentence_generator, epochs=model.epochs)
+        model.train(sentences=sentence_generator, epochs=model.epochs, total_examples=model.corpus_count)
     return model
 
 def train_years(start_year, end_year, data_dir, model_dir):
