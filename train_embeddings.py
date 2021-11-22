@@ -22,6 +22,7 @@ def train_model_on_year(top_dir, year, model_path=None):
     if model_path == None:
         model = Word2Vec(sentences=sentence_generator, vector_size=300, window=2, min_count=5, workers=3)
     else:
+        print(f'loading model from: {model_path}')
         model = Word2Vec.load(model_path)
         model.train(sentences=sentence_generator, epochs=model.epochs)
     return model
