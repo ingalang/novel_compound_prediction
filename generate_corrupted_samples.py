@@ -19,7 +19,9 @@ def generate_corruped_samples(compound, n, constituent_type, constituent_list, a
         new_constituents = random.sample(constituent_list, n*2)
         for word in new_constituents:
             new_compound = corrupt_compound(compound, word, constituent_type)
-            if new_compound not in attested_compounds and new_compound not in generated_compounds:
+            if new_compound not in attested_compounds \
+                    and new_compound not in generated_compounds \
+                    and new_compound.split()[0] != new_compound.split()[1]:
                 generated_compounds[new_compound] = 0
                 num_new_compounds += 1
                 if num_new_compounds >= n:
@@ -31,7 +33,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--in_path', type=str, required=True,
                         help='Path to .txt file with original compound list to make corrupted samples from')
-    parser.add_argument('--n', type=int, default=5,
+    parser.add_argument('--n', type=int, default=10,
                         help='Number of corrupted samples to make per compound')
     parser.add_argument('--out_dir', type=str, required=True,
                         help='Directory where you want to save the files containing the corrupted samples')
