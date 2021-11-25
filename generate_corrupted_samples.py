@@ -2,6 +2,7 @@ import argparse
 import random
 from itertools import chain
 import os
+import copy
 
 def corrupt_compound(compound, new_constituent, new_constituent_type):
     assert new_constituent_type in ['mods', 'heads'], 'constituent_type must be either mods or heads'
@@ -15,13 +16,21 @@ def generate_corruped_samples(compound, n, constituent_type, constituent_list, a
     assert constituent_type in ['mods', 'heads'], 'constituent_type must be either mods or heads'
     corrupted_samples_complete = False
     num_new_compounds = 0
+    const_dict = {word : 0 for word in copy.deepcopy(constituent_list)}
+
+    if constituent_type == 'mods':
+        constituent_to_delete = compound.split()[1]
+    else:
+        constituent_to_delete = compound.split()[0]
+
+    const_dict.pop(constituent_to_delete, None)
+
     while not corrupted_samples_complete:
-        new_constituents = random.sample(constituent_list, n*2)
+        new_constituents = random.sample(const_dict.keys(), n * 2)
         for word in new_constituents:
             new_compound = corrupt_compound(compound, word, constituent_type)
             if new_compound not in attested_compounds \
-                    and new_compound not in generated_compounds \
-                    and new_compound.split()[0] != new_compound.split()[1]:
+                    and new_compound not in generated_compounds: #TODO check for double constituents
                 generated_compounds[new_compound] = 0
                 num_new_compounds += 1
                 if num_new_compounds >= n:
