@@ -7,6 +7,8 @@ import copy
 def corrupt_compound(compound, new_constituent, new_constituent_type):
     assert new_constituent_type in ['mods', 'heads'], 'constituent_type must be either mods or heads'
     mod, head = compound.split()
+    if mod == new_constituent or head == new_constituent:
+        return False
     if new_constituent_type == 'mods':
         return ' '.join((new_constituent, head))
     else:
@@ -29,8 +31,9 @@ def generate_corruped_samples(compound, n, constituent_type, constituent_list, a
         new_constituents = random.sample(const_dict.keys(), n * 2)
         for word in new_constituents:
             new_compound = corrupt_compound(compound, word, constituent_type)
-            if new_compound not in attested_compounds \
-                    and new_compound not in generated_compounds: #TODO check for double constituents
+            if new_compound \
+                    and new_compound not in attested_compounds \
+                    and new_compound not in generated_compounds:
                 generated_compounds[new_compound] = 0
                 num_new_compounds += 1
                 if num_new_compounds >= n:
