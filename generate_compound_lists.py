@@ -9,7 +9,7 @@ def get_compounds(text, pos_tagger):
     tags = pos_tagger(text)
     tagged_text = ' '.join(['_'.join((token.text, token.tag_)) for token in tags])
     regex = r"(?<!(_NN|NNS)) ((\w+)_NN[S]?(?!P) (\w+)_NN(?!P))(?!( [\w]+?_NN(?!P)))"
-    compounds = [' '.join((match.group(3), match.group(4))) for match in re.finditer(regex, tagged_text)]
+    compounds = [' '.join((match.group(3), match.group(4))) for match in re.finditer(regex, tagged_text) if (match.group(3) != match.group(4))]
     return compounds
 
 def find_and_save_compounds(top_dir, save_dir, year):
