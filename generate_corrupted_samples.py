@@ -76,7 +76,7 @@ def main():
     compound_lists_divided = [corrupted_compounds[i: len(corrupted_compounds): n] for i in range(0, n)]
 
     for i in range(len(compound_lists_divided)):
-        filename = f'corrupted_{constituent}_{n}_{i}.txt'
+        filename = 'corrupted_{}_{}_{}.txt'.format(constituent, n, i)
         filepath = os.path.join(out_dir, filename)
         with open(filepath, 'w') as outfile:
             for comp in compound_lists_divided[i]:
