@@ -2,12 +2,12 @@ from googlesearch import search
 import googlesearch
 import argparse
 import time
-import urllib
 from urllib.error import HTTPError
 import requests
 from bs4 import BeautifulSoup
 import re
 import json
+import random
 
 def save_compound_hits(compound_hits_dict, filepath):
     with open(filepath, 'w') as outfile:
@@ -23,16 +23,20 @@ def find_hits_for_compound(compound):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--f', required=False, default='test_COCA/COCA_dev.txt',
+    parser.add_argument('--filepath', required=False, default='results_300/cosine_novel/false_positives_cosine_mods_300hidden_50e.txt',
                         help='Path to the file of generated compounds '
                                     '(in .txt format, with one compound per line) that you want to check')
+    parser.add_argument('--n', required=False, default=100, help='Number of compounds to evaluate.', type=int)
 
     args = parser.parse_args()
-    filepath = args.f
+    filepath, n = args.filepath, args.n
 
     with open(filepath, 'r') as infile:
         compounds = [line.strip('\n\r') for line in infile]
 
+    compound_subset = random.sample(compounds, n)
+    for c in compound_subset:
+        print(c)
     save_file_as = re.sub('.txt', '', filepath) + '_counts.json'
 
     compound_hits = {}
@@ -41,8 +45,8 @@ def main():
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36"}
     search_num_reg = re.compile(r'\d+(?:[^a-zA-Z0-9_]*[\d])*')
-    while len(compound_hits) < len(compounds):
-        for compound in compounds:
+    while len(compound_hits) < len(compound_subset):
+        for compound in compound_subset:
             if compound not in compound_hits:
                 if compound not in compound_tries or compound_tries[compound] < 3:
                     try:
