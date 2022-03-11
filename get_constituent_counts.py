@@ -29,7 +29,7 @@ def main():
 
 
     for year in range(start_year, end_year+1):
-        filepath = path.join(coca_filepath, f'COCA_{year}_test.txt')
+        filepath = path.join(coca_filepath, 'COCA_{}.txt'.format(year))
         with open(filepath, 'r') as infile:
             full_text = infile.read().lower()
             all_words = nltk.word_tokenize(full_text)
@@ -44,7 +44,7 @@ def main():
     counts_df = counts_df.fillna(0)
     print(counts_df.head(n=20))
 
-    counts_df.to_csv(f'COCA_word_freq_{start_year}_{end_year}.csv', sep='\t')
+    counts_df.to_csv('COCA_word_freq_{}_{}.csv'.format(start_year, end_year), sep='\t')
 
 
 if __name__ == '__main__':
