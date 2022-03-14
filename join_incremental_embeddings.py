@@ -47,12 +47,7 @@ def main():
 
     time_vec_dict = defaultdict(list)
     for year in range(args.start_year, args.end_year + 1):
-        if dims == 300:
-            word2vec_model = Word2Vec.load(os.path.join(args.model_dir, 'word2vec_{}.model'.format(year)))
-        elif dims == 100:
-            word2vec_model = Word2Vec.load(os.path.join(args.model_dir, 'word2vec_{}_100.model'.format(year)))
-        else:
-            raise ValueError('dims argument must be either 300 or 100')
+        word2vec_model = Word2Vec.load(os.path.join(args.model_dir, 'word2vec_{}_{}.model'.format(year, dims)))
         for word in unique_constituents:
             time_vec_dict[word].append(get_vec_for_word(word, word2vec_model, dims))
 
