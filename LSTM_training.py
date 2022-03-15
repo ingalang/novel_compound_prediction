@@ -8,8 +8,17 @@ from keras.layers import TimeDistributed
 from keras.models import Model
 import json
 #from keras.utils import plot_model
+import argparse
+
 
 def main():
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--epochs', type=int, required=False, default=50)
+
+    args = parser.parse_args()
+    epochs = args.epochs
+
     # define input sequence
 
 
@@ -23,7 +32,6 @@ def main():
     time_steps = 20
     input_vec_dims = 300
     num_samples = len(time_vecs)
-    epochs = 50
 
 
     sequence = np.array([vec for vec in time_vecs.values()]).flatten()
