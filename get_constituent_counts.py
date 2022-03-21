@@ -2,7 +2,6 @@ import argparse
 import numpy as np
 from os import path
 from collections import Counter
-import nltk
 import pandas as pd
 
 def main():
@@ -32,7 +31,7 @@ def main():
         filepath = path.join(coca_filepath, 'COCA_{}.txt'.format(year))
         with open(filepath, 'r') as infile:
             full_text = infile.read().lower()
-            all_words = nltk.word_tokenize(full_text)
+            all_words = full_text.split()
             num_words = len(all_words)
             word_counts = Counter(all_words)
             word_rel_counts = {word : count/num_words for word, count in word_counts.items()}
