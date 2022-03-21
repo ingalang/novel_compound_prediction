@@ -16,6 +16,16 @@ def main():
     comp_filepath, coca_filepath, start_year, end_year = \
         args.compound_file, args.coca_filepath, args.start_year, args.end_year
 
+    if 'train' in comp_filepath:
+        dataset = 'train'
+    elif 'test' in comp_filepath:
+        dataset = 'test'
+    elif 'dev' in comp_filepath:
+        dataset = 'dev'
+    else:
+        dataset = 'unknown'
+        print('Compound file mentions no dataset type (train, dev, test)')
+
     with open(comp_filepath, 'r') as infile:
         compounds = [line.strip('\n\r') for line in infile]
 
@@ -43,7 +53,7 @@ def main():
     counts_df = counts_df.fillna(0)
     print(counts_df.head(n=20))
 
-    counts_df.to_csv('COCA_word_freq_{}_{}.csv'.format(start_year, end_year), sep='\t')
+    counts_df.to_csv('COCA_word_freq_{}_{}_{}.csv'.format(dataset, start_year, end_year), sep='\t')
 
 
 if __name__ == '__main__':
