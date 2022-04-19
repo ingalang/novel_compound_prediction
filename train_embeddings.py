@@ -16,6 +16,14 @@ class SentenceReader(object):
                 yield line.split()
 
 def train_model_on_year(top_dir, model_dir, year, dims):
+    """
+    Trains word2vec model on a given year's worth of data
+    :param top_dir: directory in which all the text files are located
+    :param model_dir: directory where the model is located
+    :param year: year from which we are using text to train on
+    :param dims: number of dims we want for our embeddings
+    :return: trained word2vec model
+    """
     print(f'Training model on {year} data')
     previous_model_name = f'word2vec_{year - 1}_{dims}.model'
     previous_model_dir = os.path.join(model_dir, previous_model_name)
@@ -32,6 +40,15 @@ def train_model_on_year(top_dir, model_dir, year, dims):
     return model
 
 def train_years(start_year, end_year, data_dir, model_dir, dims):
+    """
+    Goes through all years from start year to end year (inclusive) and incrementally trains and saves a word2vec model.
+    :param start_year: Year at which to start
+    :param end_year: Year at which to end
+    :param data_dir: Directory in which we load and save our text data
+    :param model_dir: Directory in which we load and save our word2vec model
+    :param dims: Dimensions that we want for our embedding vectors
+    :return: None
+    """
     for i in range(start_year, end_year + 1):
         model = train_model_on_year(top_dir=data_dir, model_dir=model_dir, year=i, dims=dims)
         model.save(os.path.join(model_dir, f'word2vec_{i}_{dims}.model'))

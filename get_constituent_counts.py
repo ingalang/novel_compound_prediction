@@ -16,6 +16,7 @@ def main():
     comp_filepath, coca_filepath, start_year, end_year = \
         args.compound_file, args.coca_filepath, args.start_year, args.end_year
 
+    # figure out which dataset part we're working with
     if 'train' in comp_filepath:
         dataset = 'train'
     elif 'test' in comp_filepath:
@@ -29,14 +30,14 @@ def main():
     with open(comp_filepath, 'r') as infile:
         compounds = [line.strip('\n\r') for line in infile]
 
+    # get all unique words among compound constituents, both modifiers and heads
     unique_words = np.unique([comp.split()[0] for comp in compounds] + [comp.split()[1] for comp in compounds])
-    time_span = (end_year-start_year)+1
 
     counts_df = pd.DataFrame()
     counts_df['word'] = pd.Series(unique_words)
     print(counts_df.head())
 
-
+    # go through each year and count all occurrences of each unique word for each year
     for year in range(start_year, end_year+1):
         filepath = path.join(coca_filepath, 'COCA_{}.txt'.format(year))
         with open(filepath, 'r') as infile:
@@ -50,9 +51,10 @@ def main():
 
     print(counts_df.head(n=20))
 
+    # words we don't have counts for in a given year get a count of 0
     counts_df = counts_df.fillna(0)
-    print(counts_df.head(n=20))
 
+    # save the counts to a csv file
     counts_df.to_csv('COCA_word_freq_{}_{}_{}.csv'.format(dataset, start_year, end_year), sep='\t')
 
 

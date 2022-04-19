@@ -5,6 +5,7 @@ from collections import Counter
 from gensim.models import Word2Vec
 
 def load_dataset(dir, data_name):
+    # load a txt file with compounds, return a list of compounds
     filepath = os.path.join(dir, f'COCA_{data_name}.txt')
     with open(filepath, 'r') as compound_file:
         compound_list = [line for line in compound_file]
@@ -32,20 +33,25 @@ def main():
 
     all_compounds = []
 
+    # go through each year, load the compounds from the given year, singularize the heads, and add to list of all compounds
     for year in range(start_year, end_year + 1):
         print(f'Processing compounds from year {year}')
         compound_list = load_compounds(top_dir, year)
         singularized_compounds = singularize_heads(compound_list)
         all_compounds.extend(singularized_compounds)
 
+    # we use a frequency cutoff to ensure that compounds occur at least a given number of times
     if freq_cutoff:
         compound_counts = dict(Counter(all_compounds))
         all_compounds = [comp for comp in compound_counts if compound_counts[comp] >= freq_cutoff]
 
+    # get unique compounds from the all_compounds list
     unique_compounds = list({*all_compounds})
 
     word2vec_model = Word2Vec.load('word2vec_2009.model')
 
+    # If we're dealing with dev data, we first need a dictionary of training compounds
+    # to make sure the dev compounds are not found in training data
     if data_name == 'dev':
         train_data = load_dataset(save_dir, 'train')
         print('Making train dict...')
@@ -53,6 +59,7 @@ def main():
         print('Making set of compounds for dev set that are not in train set...')
         unique_compounds = [comp for comp in unique_compounds if comp not in train_dict and
                             comp.split()[0] in word2vec_model.wv and comp.split()[1] in word2vec_model.wv]
+    # if we're making test data, we have to make sure the compounds occur neither in the train nor in the dev data
     elif data_name == 'test':
         print('Making train dict...')
         train_data = load_dataset(save_dir, 'train')
@@ -68,6 +75,7 @@ def main():
                             and compound.split()[0] in word2vec_model.wv
                             and compound.split()[1] in word2vec_model.wv]
 
+    # save compounds, indicating the frequency cutoff in the filename
     if freq_cutoff:
         filepath = os.path.join(save_dir, f'COCA_{data_name}_min{freq_cutoff}.txt')
     else:

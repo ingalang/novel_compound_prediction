@@ -4,6 +4,7 @@ import numpy as np
 import random
 
 def main():
+    # define the constituent we are looking at
     constituent = 'mod'
     with open(f'results_300/cosine_novel/false_positives_cosine_{constituent}s_300hidden_50e.txt', 'r') as infile:
         fps = [line.strip('\n\r') for line in infile]
@@ -17,8 +18,6 @@ def main():
     with open(f'results_300/cosine_novel/true_negatives_cosine_{constituent}s_300hidden_50e.txt', 'r') as infile:
         tns = [line.strip('\n\r') for line in infile]
 
-    ## classified as positive: tps and fps
-    ## classified as negative: tns and fns
 
     print(len(fps))
     print(len(tps))
